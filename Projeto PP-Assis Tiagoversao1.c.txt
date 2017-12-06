@@ -1,0 +1,299 @@
+#include "Header.h"
+
+int main(){
+
+
+	int quemjoga=0;  //0 = ia , 1 = usuario joga
+	int i;
+	char tecla;
+	srand(time(NULL));
+	system("color f0");
+	do{
+		montarTabuleiro();
+
+		for (i=1; i<10; i++)
+			tabuleiro[i]=0;
+		do{
+			lance++;
+			quemjoga=1-quemjoga; //inverte jogador
+			(quemjoga==1)?usuariojoga():ia();
+			verificavitoria();
+		}while(lance<9 && gameover==0);
+		gotoxy(34,19);
+		if (gameover==0){
+
+			system("color f1");
+			_sleep(500);
+			system("color f0");
+			_sleep(500);
+			system("color f1");
+			_sleep(500);
+			system("color f0");
+			printf("Deu Empate! ");
+		}
+		lance=0; // contador de jogadas
+		gameover=0;
+		gotoxy(1,21);
+		system("color f0");
+		printf("Deseja jogar novamente (S/N)? ");
+
+		do{
+			tecla=getch();
+		}while(tecla!='S'&&tecla!='N'&&tecla!='s'&&tecla!='n');
+	}while(tecla=='S'||tecla=='s');
+	return 0;
+}
+
+void montarTabuleiro(){
+	int i;
+	system("cls");
+	gotoxy(5,25);
+	printf("Projeto de Pratica de Programacao-");
+	gotoxy(41,25);
+	printf("© 2014 Assis Tiago de Oliveira Filho ");
+	gotoxy(32,3);
+	printf(" O JOGO DA VELHA");
+
+	for(i=2; i<5;i++){
+		gotoxy(31,i);
+		printf("%c",223);
+	}
+	for(i=2; i<5;i++){
+		gotoxy(48,i);
+		printf("%c",223);
+	}
+	for(i=31; i<48;i++){
+		gotoxy(i,2);
+		printf("%c",223);
+	}
+	for(i=31; i<48;i++){
+		gotoxy(i,4);
+		printf("%c",223);
+	}
+
+	for (i=6; i<15; i++){
+		gotoxy(36,i);
+		printf("%c%c    %c%c",219,219,219,219);
+	}
+
+	for (i=32; i<48; i++){
+		gotoxy(i,8);
+		printf("%c",219);
+	}
+	for (i=32; i<48; i++){
+		gotoxy(i,12);
+		printf("%c",219);
+	}
+
+}
+
+void usuariojoga(){
+	int tecla;
+	gotoxy(32,20);
+	printf("Sua vez de Jogar!");
+	do{
+		tecla=getch()-48;
+	}while(tecla<1 || tecla>9 || tabuleiro[tecla]!=0);
+	imprime(tecla);
+	tabuleiro[tecla]=1;
+	jogada[lance]=tecla;
+	gotoxy(32,20);
+	printf("                 ");
+}
+
+void imprime (int tecla){
+	int x,y;
+	char simbolo;
+	simbolo=(lance%2!=0)?'X':'O';
+	switch(tecla){
+	case 1:
+		x=33;y=14;
+		break;
+	case 2:
+		x=40;y=14;
+		break;
+	case 3:
+		x=46;y=14;
+		break;
+	case 4:
+		x=33;y=10;
+		break;
+	case 5:
+		x=40;y=10;
+		break;
+	case 6:
+		x=46;y=10;
+		break;
+	case 7:
+		x=33;y=6;
+		break;
+	case 8:
+		x=40;y=6;
+		break;
+	case 9:
+		x=46;y=6;
+		break;
+	}
+	gotoxy(x,y);
+	printf("%c",simbolo);
+}
+
+void ia(){
+	gotoxy(32,20);
+	printf("Aguarde sua vez!! ");
+	_sleep(1000);
+	gotoxy(32,20);
+	printf("                     ");
+	switch(lance){
+	case 1: //joga ou no meio ou em uma quina
+		jogadacpu=1+rand()%5*2;
+		break;
+
+	case 2: //joga no meio caso esteja livre, senao joga em uma quina
+		if (tabuleiro[5]==0)
+			jogadacpu=5;
+		else
+			do{
+				jogadacpu=1+rand()%5*2;
+			}while(tabuleiro[jogadacpu]!=0);
+		break;
+
+	case 3: 
+		//computador inicia em quina e humano responde no centro
+		if (jogada[1]%2==1 && jogada[2]==5)
+			jogadacpu=10-jogada[1];  //CPU joga na quina oposta
+		//computador inicia no centro e humano responde em quina
+		else if (jogada[1]==5 && jogada[2]%2==1)
+			jogadacpu=10-jogada[2];   //CPU joga na quina oposta
+		//computador inicia no centro e humano responde em nao-quina
+		else if (jogada[1]==5 && jogada[2]%2==0)
+			do{
+				jogadacpu=1+rand()%5*2;
+			}while(jogadacpu==5);    //CPU joga numa quina
+		//computador inicia em quina e humano responde em outra quina
+		else if (jogada[1]%2==1 && jogada[2]%2==1)
+			do{   //CPU joga em outra quina
+				jogadacpu=1+rand()%5*2;
+			}while(jogadacpu==5 || tabuleiro[jogadacpu]!=0);
+		//caso restante: quina x casa par  -  jogar sempre no centro
+		else
+			jogadacpu=5;
+		break;
+
+	case 4:
+		if (tabuleiro[2]==1 && tabuleiro[4]==1) jogadacpu=1;
+		else if (tabuleiro[2]==1 && tabuleiro[6]==1) jogadacpu=3;
+		else if (tabuleiro[4]==1 && tabuleiro[8]==1) jogadacpu=7;
+		else if (tabuleiro[6]==1 && tabuleiro[8]==1) jogadacpu=9;
+		else if (tabuleiro[1]==1 && tabuleiro[9]==1 ||
+			tabuleiro[3]==1 && tabuleiro[7]==1)
+			jogadacpu=2+rand()%4*2;
+		else
+			do{
+				jogadacpu=1+rand()%9;
+			}while(tabuleiro[jogadacpu]!=0);
+		cpuverificaseganhaouperde(1);
+		break;
+
+	default:
+		do{
+			jogadacpu=1+rand()%9;
+		}while(tabuleiro[jogadacpu]!=0);
+		cpuverificaseganhaouperde(1);
+		cpuverificaseganhaouperde(2);
+		break;
+	}
+	imprime(jogadacpu);
+	tabuleiro[jogadacpu]=2;
+	jogada[lance]=jogadacpu;
+	_sleep(500);
+}
+
+void verificavitoria(){
+	if ( (tabuleiro[1]==1 && tabuleiro[2]==1 && tabuleiro[3]==1)||
+		(tabuleiro[4]==1 && tabuleiro[5]==1 && tabuleiro[6]==1)||
+		(tabuleiro[7]==1 && tabuleiro[8]==1 && tabuleiro[9]==1)||
+		(tabuleiro[1]==1 && tabuleiro[4]==1 && tabuleiro[7]==1)||
+		(tabuleiro[2]==1 && tabuleiro[5]==1 && tabuleiro[8]==1)||
+		(tabuleiro[3]==1 && tabuleiro[6]==1 && tabuleiro[9]==1)||
+		(tabuleiro[1]==1 && tabuleiro[5]==1 && tabuleiro[9]==1)||
+		(tabuleiro[3]==1 && tabuleiro[5]==1 && tabuleiro[7]==1) ){
+			gotoxy(30,20);
+			system("color f0");
+			_sleep(500);
+			system("color f2");
+			_sleep(500);
+			system("color f0");
+			_sleep(500);
+			system("color f2");
+			_sleep(500);
+			printf("Voce ganhou, Parabéns!!!");
+			gameover=1;
+	}
+	if ( (tabuleiro[1]==2&&tabuleiro[2]==2&&tabuleiro[3]==2)||
+		(tabuleiro[4]==2&&tabuleiro[5]==2&&tabuleiro[6]==2)||
+		(tabuleiro[7]==2&&tabuleiro[8]==2&&tabuleiro[9]==2)||
+		(tabuleiro[1]==2&&tabuleiro[4]==2&&tabuleiro[7]==2)||
+		(tabuleiro[2]==2&&tabuleiro[5]==2&&tabuleiro[8]==2)||
+		(tabuleiro[3]==2&&tabuleiro[6]==2&&tabuleiro[9]==2)||
+		(tabuleiro[1]==2&&tabuleiro[5]==2&&tabuleiro[9]==2)||
+		(tabuleiro[3]==2&&tabuleiro[5]==2&&tabuleiro[7]==2) ){
+			gotoxy(30,19);
+			system("color f0");
+			_sleep(500);
+			system("color f4");
+			_sleep(500);
+			system("color f0");
+			_sleep(500);
+			system("color f4");
+			_sleep(500);
+			printf("O computador venceu!!!");
+			gameover=1;
+	}
+
+}
+
+void cpuverificaseganhaouperde(int i){
+
+	if (tabuleiro[1]==0 && (tabuleiro[2]==i && tabuleiro[3]==i ||
+		tabuleiro[5]==i && tabuleiro[9]==i ||
+		tabuleiro[4]==i && tabuleiro[7]==i))
+		jogadacpu=1;
+	if (tabuleiro[3]==0 && (tabuleiro[1]==i && tabuleiro[2]==i ||
+		tabuleiro[5]==i && tabuleiro[7]==i ||
+		tabuleiro[6]==i && tabuleiro[9]==i))
+		jogadacpu=3;
+	if (tabuleiro[7]==0 && (tabuleiro[1]==i && tabuleiro[4]==i ||
+		tabuleiro[3]==i && tabuleiro[5]==i ||
+		tabuleiro[8]==i && tabuleiro[9]==i))
+		jogadacpu=7;
+
+	if (tabuleiro[9]==0 && (tabuleiro[1]==i && tabuleiro[5]==i ||
+		tabuleiro[3]==i && tabuleiro[6]==i ||
+		tabuleiro[7]==i && tabuleiro[8]==i))
+		jogadacpu=9;
+	if (tabuleiro[2]==0 && (tabuleiro[1]==i && tabuleiro[3]==i ||
+		tabuleiro[5]==i && tabuleiro[8]==i))
+		jogadacpu=2;
+	if (tabuleiro[4]==0 && (tabuleiro[1]==i && tabuleiro[7]==i ||
+		tabuleiro[5]==i && tabuleiro[6]==i))
+		jogadacpu=4;
+	if (tabuleiro[6]==0 && (tabuleiro[3]==i && tabuleiro[9]==i ||
+		tabuleiro[4]==i && tabuleiro[5]==i))
+		jogadacpu=6;
+	if (tabuleiro[8]==0 && (tabuleiro[2]==i && tabuleiro[7]==i ||
+		tabuleiro[7]==i && tabuleiro[9]==i))
+		jogadacpu=8;
+	if (tabuleiro[5]==0 && (tabuleiro[2]==i && tabuleiro[8]==i ||
+		tabuleiro[4]==i && tabuleiro[6]==i ||
+		tabuleiro[1]==i && tabuleiro[9]==i ||
+		tabuleiro[3]==i && tabuleiro[7]==i))
+		jogadacpu=5;
+
+}
+void gotoxy(int x, int y) {
+	COORD c;
+	c.X = x - 1;
+	c.Y = y - 1;
+	SetConsoleCursorPosition (GetStdHandle(STD_OUTPUT_HANDLE), c);
+}

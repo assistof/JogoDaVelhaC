@@ -1,0 +1,22 @@
+#include <stdio.h>
+#include <time.h>
+#include <windows.h>
+#include <conio.h>
+
+
+/*prototipo de funcoes*/
+void gotoxy(int x, int y);
+void montarTabuleiro();
+void usuariojoga();
+void imprime (int tecla);
+void ia();
+void verificavitoria();
+void cpuverificaseganhaouperde(int n);
+
+
+/*variaveis globais*/
+int lance; // conta as jogadas
+int gameover;
+int tabuleiro[10];
+int jogada[10];
+int jogadacpu;
